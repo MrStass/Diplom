@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row">
+                {% for book in object_list %}
+                <div class="col-md-3">
+            <div class="card" style="margin-bottom: 10px;">
+                <a href="{% url 'book_detail' book.id %}">
+                <img src="{{ book.image.url }}" style="max-height: 180px;" class="card-img-top" alt="{{ book.title }}">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">
+                    <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+                    </h5>
+                    <p class="card-text">{% for genre in book.genres.all %}
+                            <a href="#">{{ genre.name }}</a>
+                            {% if not forloop.last %}, {% endif %}
+                        {% endfor %}</p>
+                    <a href="#" class="btn btn-primary">Купити {{ book.price }}</a>
+                    {% if book.id in cart_books_ids %}
+                        <button class="btn btn-success disabled">У кошику</button>
+                        {% else %}
+                        <form action="{% url 'add_to_cart' book.id %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button type="submit" class="btn btn-primary">Додати в кошик</button>
+                        </form>
+                    {% endif %}
+                
+                </div>
+                </div>
+            </div>
+                {% endfor %}
+            </div>
+        <div>
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+            
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+            
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+        </div>
+        <br>
+    </div>
+    <h2>Рекомендовані книги</h2>
+    <div class="row">
+        {% for book in recommended_books %}
+            <div class="col-md-3">
+                <div class="card" style="margin-bottom: 10px;">
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+                        </h5>
+                        <a href="#" class="btn btn-primary">Купити {{ book.price }}</a>
+                        {% if book.id in cart_books_ids %}
+                            <button class="btn btn-success disabled">У кошику</button>
+                            {% else %}
+                            <form action="{% url 'add_to_cart' book.id %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" class="btn btn-primary">Додати в кошик</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+{% endblock content %}

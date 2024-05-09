@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="book-detail">
+    <h2>{{ book.title }}</h2>
+    {% if book.image %}
+        <img src="{{ book.image.url }}" alt="{{ book.title }}" style="max-width: 300px;">
+    {% endif %}
+    <p>Автори: {{ book.authors.all|join:", " }}</p>
+    <p>Жанри: {{ book.genres.all|join:", " }}</p>
+    <p>Рік: {{ book.year }}</p>
+    <p>Опис: {{ book.description }}</p>
+    <p>Ціна: {{ book.price }} грн.</p>
+    <p>Формат: {{ book.book_format }}</p>
+    <p>Мова: {{ book.language }}</p>
+    <p>Кількість сторінок: {{ book.page_count }}</p>
+    <p>Тип обкладинки: {{ book.cover_type }}</p>
+    <p>Тип книги: {{ book.book_type }}</p>
+    <p>Оригінальна назва: {{ book.original_name }}</p>
+    <p>Середній рейтинг: {{ book.average_rating }} з 5</p>
+
+    <h3>Відгуки</h3>
+    {% for review in reviews %}
+    <div class="review">
+        <strong>{{ review.user.username }}</strong>
+        <p>Rating: {{ review.rating }}</p>
+        <p>{{ review.text }}</p>
+    </div>
+    {% empty %}
+    <p>Наразі відгуків немає.</p>
+    {% endfor %}
+
+    <h3>Залишити відгук:</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

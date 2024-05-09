@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block brand %}{% endblock %}
+
+{% block content %}
+    <form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
+        <table>
+            {% bootstrap_form form %}
+            <tr>
+                <td>
+                    <button type="submit" class="btn btn-success">Register</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+{% endblock content %}

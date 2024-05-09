@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Вектор книги</title>
+</head>
+<body>
+    <h1>Виберіть книгу для перегляду вектора</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Показати вектор</button>
+    </form>
+
+    {% if vector_data %}
+    <h2>Вектор для "{{ selected_book.title }}":</h2>
+    <ul>
+    {% for value in vector_data %}
+        <li>{{ value }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+</body>
+</html>
+{% endblock content %}
