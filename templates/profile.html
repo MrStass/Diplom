@@ -1,16 +1,62 @@
 {% extends 'base.html' %}
 {% block content %}
-        <div class="container">
-            <table class="table">
-                <tr>
-                    <th>Login</th>
-                    <th>Email</th>
-                </tr>
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.email }}</td>
-                </tr>
-            </table>
-        </div>
-    
+<div class="container">
+    <h2>Профіль користувача</h2>
+    <table class="table">
+        <tr>
+            <th>Логін</th>
+            <td>{{ user.username }}</td>
+        </tr>
+        <tr>
+            <th>Ім'я</th>
+            <td>{{ user.first_name }}</td>
+        </tr>
+        <tr>
+            <th>Прізвище</th>
+            <td>{{ user.last_name }}</td>
+        </tr>
+        <tr>
+            <th>Електронна пошта</th>
+            <td>{{ user.email }}</td>
+        </tr>
+        <tr>
+            <th>Пароль</th>
+            <td>********</td>
+        </tr>
+    </table>
+
+    <h3>Бажані книжки</h3>
+    {% if favorite_books %}
+    <ul class="list-group">
+        {% for favorite in favorite_books %}
+        <li class="list-group-item">
+            <a href="{% url 'book_detail' favorite.book.id %}">{{ favorite.book.title }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>У вас немає бажаних книжок.</p>
+    {% endif %}
+
+    <h3>Ваші замовлення</h3>
+    {% if orders %}
+    <ul class="list-group">
+        {% for order in orders %}
+        <li class="list-group-item">
+            <h4>Замовлення №{{ order.id }} від {{ order.created_at }}</h4>
+            <p>Адреса доставки: {{ order.delivery_address }}</p>
+            <p>Метод оплати: {{ order.payment_method }}</p>
+            <ul>
+                {% for item in order.items.all %}
+                <li>{{ item.book.title }} - {{ item.quantity }} x {{ item.unit_price }} = {{ item.total_price }}</li>
+                {% endfor %}
+            </ul>
+            <p><strong>Загальна сума: {{ order.total_amount }}</strong></p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>У вас немає замовлень.</p>
+    {% endif %}
+</div>
 {% endblock content %}

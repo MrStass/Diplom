@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <h2>Ваш кошик</h2>
 <table class="table">
@@ -17,13 +18,13 @@
             <td>{{ item.book.title }}</td>
             <td>{{ item.book.price }} грн</td>
             <td>
-                <form action="{% url 'change_quantity' item.id %}" method="post">
+                <form class="change-quantity-form" action="{% url 'change_quantity' item.id %}" method="post">
                     {% csrf_token %}
                     <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control">
                     <button type="submit" class="btn btn-info btn-sm">Змінити</button>
                 </form>
             </td>
-            <td>{{ item.total_price }} грн</td>
+            <td class="total-price">{{ item.total_price }} грн</td>
             <td>
                 <form action="{% url 'remove_from_cart' item.id %}" method="post">
                     {% csrf_token %}
@@ -37,5 +38,15 @@
         </tr>
         {% endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3">Загальна сума:</td>
+            <td id="cart-total">{{ cart.total_cart_price }} грн</td>
+            <td><a href="{% url 'purchase' %}" class="btn btn-primary">Купити все</a></td>
+        </tr>
+    </tfoot>
 </table>
+{% endblock %}
+{% block javascript %}
+<script src="{% static 'js/cart_actions.js' %}"></script>
 {% endblock %}

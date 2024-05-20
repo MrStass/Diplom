@@ -6,6 +6,9 @@ from main.models import Book
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')
 
+    def total_cart_price(self):
+        return sum(item.total_price() for item in self.items.all())
+
     def __str__(self):
         return f"Cart of {self.user.username}"
 

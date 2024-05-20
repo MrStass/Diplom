@@ -6,13 +6,16 @@ import numpy as np
 import pickle
 from django.db.models.signals import post_save, post_delete
 
+
 @receiver(post_save, sender=CartItem)
 def update_recommendations_on_save(sender, instance, created, **kwargs):
     update_recommendations(instance.cart)
 
+
 @receiver(post_delete, sender=CartItem)
 def update_recommendations_on_delete(sender, instance, **kwargs):
     update_recommendations(instance.cart)
+
 
 def update_recommendations(cart):
     cart_items = CartItem.objects.filter(cart=cart)
@@ -30,7 +33,7 @@ def update_recommendations(cart):
     all_matrix = np.vstack(all_vectors)
     cosine_sim = cosine_similarity(cart_matrix, all_matrix)
     avg_similarity = np.mean(cosine_sim, axis=0)
-    top_indices = np.argsort(avg_similarity)[::-1][:2]
+    top_indices = np.argsort(avg_similarity)[::-1][:10]
     recommended_books = [all_books[int(i)] for i in top_indices]
 
     recommendation, created = RecommendedBook.objects.get_or_create(user=user)

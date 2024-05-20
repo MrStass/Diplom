@@ -2,9 +2,10 @@ from main.models import *
 from cart.models import *
 
 
-def get_all_genres(request):
+def get_all_genres_and_authors(request):
     return {
-        'genres': Genre.objects.all()
+        'genres': Genre.objects.all(),
+        'authors': Author.objects.all()
     }
 
 

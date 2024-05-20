@@ -1,81 +1,238 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+{% endblock css %}
 
 {% block content %}
-    <div class="row">
-                {% for book in object_list %}
-                <div class="col-md-3">
-            <div class="card" style="margin-bottom: 10px;">
+<div class="container books-page text-center">
+    {% if new_arrivals %}
+    <h2>Новинки</h2>
+    <div class="row justify-content-center">
+        {% for book in new_arrivals %}
+        <div class="col-md-2 book-column">
+            <div class="card h-100">
                 <a href="{% url 'book_detail' book.id %}">
-                <img src="{{ book.image.url }}" style="max-height: 180px;" class="card-img-top" alt="{{ book.title }}">
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
                 </a>
                 <div class="card-body">
-                    <h5 class="card-title">
-                    <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
-                    </h5>
-                    <p class="card-text">{% for genre in book.genres.all %}
-                            <a href="#">{{ genre.name }}</a>
-                            {% if not forloop.last %}, {% endif %}
-                        {% endfor %}</p>
-                    <a href="#" class="btn btn-primary">Купити {{ book.price }}</a>
-                    {% if book.id in cart_books_ids %}
-                        <button class="btn btn-success disabled">У кошику</button>
-                        {% else %}
-                        <form action="{% url 'add_to_cart' book.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.path }}">
-                            <button type="submit" class="btn btn-primary">Додати в кошик</button>
-                        </form>
-                    {% endif %}
-                
-                </div>
-                </div>
-            </div>
-                {% endfor %}
-            </div>
-        <div>
-            <div class="pagination">
-                <span class="step-links">
-                    {% if page_obj.has_previous %}
-                        <a href="?page=1">&laquo; first</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                    {% endif %}
-            
-                    <span class="current">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                    </span>
-            
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">next</a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-                    {% endif %}
-                </span>
-        </div>
-        <br>
-    </div>
-    <h2>Рекомендовані книги</h2>
-    <div class="row">
-        {% for book in recommended_books %}
-            <div class="col-md-3">
-                <div class="card" style="margin-bottom: 10px;">
-                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
-                        </h5>
-                        <a href="#" class="btn btn-primary">Купити {{ book.price }}</a>
-                        {% if book.id in cart_books_ids %}
-                            <button class="btn btn-success disabled">У кошику</button>
+                    <div class="card-title">
+                        <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+                    </div>
+                    <p class="card-text">
+                        {% for author in book.author.all %}
+                            {{ author.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">{{ book.price }} грн<br>
+                        <span class="availability {% if book.is_available %}available{% else %}not-available{% endif %}">
+                            {% if book.is_available %}
+                                Є в наявності
                             {% else %}
-                            <form action="{% url 'add_to_cart' book.id %}" method="post">
+                                Нема в наявності
+                            {% endif %}
+                        </span>
+                    </p>
+                    <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="book-page-btn book-buy-btn">Купити</button>
+                    </form>
+                    <button class="book-favorite-btn {% if book.id in favorite_books_ids %}favorite{% endif %}" data-book-id="{{ book.id }}">
+                        {% if book.id in favorite_books_ids %}
+                            <i class="fas fa-heart"></i> 
+                        {% else %}
+                            <i class="far fa-heart"></i> 
+                        {% endif %}
+                    </button>
+                    {% if user.is_authenticated %}
+                        {% if book.id in cart_books_ids %}
+                            <button class="book-page-btn book-cartin-action-btn disabled">У кошику</button>
+                        {% else %}
+                            <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="{{ request.path }}">
-                                <button type="submit" class="btn btn-primary">Додати в кошик</button>
+                                <button type="submit" class="book-page-btn book-cart-action-btn add-to-cart-btn" data-book-id="{{ book.id }}">До кошику</button>
                             </form>
                         {% endif %}
-                    </div>
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="book-page-btn book-cart-action-btn">До кошику</a>
+                    {% endif %}
                 </div>
             </div>
+        </div>
         {% endfor %}
-
     </div>
+    {% endif %}
+</div>
+
+<div class="container books-page text-center">
+    <h2>Основний каталог</h2>
+    <div class="row justify-content-center">
+        {% for book in books %}
+        <div class="col-md-2 book-column">
+            <div class="card h-100">
+                <a href="{% url 'book_detail' book.id %}">
+                    <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                </a>
+                <div class="card-body">
+                    <div class="card-title">
+                        <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+                    </div>
+                    <p class="card-text">
+                        {% for author in book.author.all %}
+                            {{ author.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text">{{ book.price }} грн<br>
+                        <span class="availability {% if book.is_available %}available{% else %}not-available{% endif %}">
+                            {% if book.is_available %}
+                                Є в наявності
+                            {% else %}
+                                Нема в наявності
+                            {% endif %}
+                        </span>
+                    </p>
+                    <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="book-page-btn book-buy-btn">Купити</button>
+                    </form>
+                    <button class="book-favorite-btn {% if book.id in favorite_books_ids %}favorite{% endif %}" data-book-id="{{ book.id }}">
+                        {% if book.id in favorite_books_ids %}
+                            <i class="fas fa-heart"></i> 
+                        {% else %}
+                            <i class="far fa-heart"></i> 
+                        {% endif %}
+                    </button>
+                    {% if user.is_authenticated %}
+                        {% if book.id in cart_books_ids %}
+                            <button class="book-page-btn book-cartin-action-btn disabled">У кошику</button>
+                        {% else %}
+                            <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
+                                <button type="submit" class="book-page-btn book-cart-action-btn add-to-cart-btn" data-book-id="{{ book.id }}">До кошику</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="book-page-btn book-cart-action-btn">До кошику</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container text-center">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo; Попередня</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo; Попередня</span>
+                </li>
+            {% endif %}
+
+            {% for i in page_obj.paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">Наступна &raquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Наступна &raquo;</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+<br>
+
+<div class="container text-center">
+    <div class="recommended-books-container">
+        {% if recommended_books %}
+        <h2>Рекомендовані вам</h2>
+        <div class="container books-page">
+            <div class="row">
+                {% for book in recommended_books %}
+                    <div class="col-md-2 book-column">
+                        <div class="card h-100">
+                            <a href="{% url 'book_detail' book.id %}">
+                                <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+                            </a>
+                            <div class="card-body">
+                                <div class="card-title">
+                                    <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+                                </div>
+                                <p class="card-text">
+                                    {% for author in book.author.all %}
+                                        {{ author.name }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </p>
+                                <p class="card-text">{{ book.price }} грн<br>
+                                    <span class="availability {% if book.is_available %}available{% else %}not-available{% endif %}">
+                                        {% if book.is_available %}
+                                            Є в наявності
+                                        {% else %}
+                                            Нема в наявності
+                                        {% endif %}
+                                    </span>
+                                </p>
+                                <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="book-page-btn book-buy-btn">Купити</button>
+                                </form>
+                                <button class="book-favorite-btn {% if book.id in favorite_books_ids %}favorite{% endif %}" data-book-id="{{ book.id }}">
+                                    {% if book.id in favorite_books_ids %}
+                                        <i class="fas fa-heart"></i> 
+                                    {% else %}
+                                        <i class="far fa-heart"></i> 
+                                    {% endif %}
+                                </button>
+                                {% if user.is_authenticated %}
+                                    {% if book.id in cart_books_ids %}
+                                        <button class="book-page-btn book-cartin-action-btn disabled">У кошику</button>
+                                    {% else %}
+                                        <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.path }}">
+                                            <button type="submit" class="book-page-btn book-cart-action-btn add-to-cart-btn" data-book-id="{{ book.id }}">До кошику</button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{% url 'login' %}?next={{ request.path }}" class="book-page-btn book-cart-action-btn">До кошику</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}
+
+{% block javascript %}
+<script src="{% static 'js/favorites_actions.js' %}"></script>    
+<script src="{% static 'js/add_to_cart.js' %}"></script>
+{% endblock %}
+
+{% block footer %}
+{% include 'includes/footer.html' %}
+{% endblock %}

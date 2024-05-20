@@ -1,10 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h1>Оформлення замовлення</h1>
+    <h2>Перегляд замовлення</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Назва книги</th>
+                <th scope="col">Ціна за одиницю</th>
+                <th scope="col">Кількість</th>
+                <th scope="col">Загальна ціна</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book, quantity in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.price }} грн</td>
+                <td>{{ quantity }}</td>
+                <td>{{ book.price }} грн</td>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">Загальна сума:</td>
+                <td>{{ total_price }} грн</td>
+            </tr>
+        </tfoot>
+    </table>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="book_id" value="{{ request.GET.book_id }}">
+        <h2>Контактні дані</h2>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Телефон</label>
+            <input type="text" id="phone" name="phone" class="form-control" required>
+        </div>
+        <h2>Дані доставки</h2>
+        <div class="mb-3">
+            <label for="city" class="form-label">Місто</label>
+            <input type="text" id="city" name="city" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="street" class="form-label">Вулиця</label>
+            <input type="text" id="street" name="street" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="house" class="form-label">Будинок</label>
+            <input type="text" id="house" name="house" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="payment_method" class="form-label">Спосіб оплати</label>
+            <select id="payment_method" name="payment_method" class="form-select" required>
+                <option value="cash">Наложений платіж</option>
+                <option value="card">Оплата карткою</option>
+            </select>
+        </div>
+        <div class="card-details d-none mb-3">
+            <label for="card_number" class="form-label">Номер картки</label>
+            <input type="text" id="card_number" name="card_number" class="form-control">
+            <label for="card_expiry" class="form-label">Термін дії</label>
+            <input type="text" id="card_expiry" name="card_expiry" class="form-control" placeholder="мм/рр">
+            <label for="card_cvv" class="form-label">CVV</label>
+            <input type="text" id="card_cvv" name="card_cvv" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Оформити замовлення</button>
+    </form>
+</div>
+{% endblock %}
+{% block javascript %}
+<script src="{% static 'js/payment_handling.js' %}"></script>
+{% endblock %}

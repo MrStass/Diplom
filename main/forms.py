@@ -9,3 +9,7 @@ class BookVectorForm(forms.Form):
 
 class BookSelectForm(forms.Form):
     book = forms.ModelChoiceField(queryset=Book.objects.all(), label="Виберіть книгу")
+
+
+class SearchForm(forms.Form):
+    query = forms.CharField(label='Search', max_length=100)

@@ -22,14 +22,18 @@ from main import views as main_views
 from userprofile import views as user_views
 from cart import views as cart_views
 from review import views as review_views
+from orders import views as order_views
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth import views as auth_views
 
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
     path("", main_views.IndexView.as_view(), name='home'),
     path('genre/<int:genre_id>/', main_views.ChooseGenre.as_view(), name='genre'),
-    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    path('author/<int:author_id>/', main_views.ChooseAuthor.as_view(), name='author'),
+    path('login/', LoginView.as_view(template_name='login.html', next_page='/'), name='login'),
     path("logout/", LogoutView.as_view(), name='logout'),
     path("registration/", user_views.RegistrationView.as_view(), name='registration'),
     path("profile/", user_views.ProfileView.as_view(), name='profile'),
@@ -40,4 +44,16 @@ urlpatterns = [
     path('change-quantity/<int:item_id>/', cart_views.ChangeQuantityView.as_view(), name='change_quantity'),
     path('vectorize/', main_views.BookVectorView.as_view(), name='vectorize_book'),
     path('vector-display/', main_views.VectorDisplayView.as_view(), name='vector_display'),
+    path('search/', main_views.BookSearchView.as_view(), name='book_search'),
+    path('purchase/', order_views.PurchaseView.as_view(), name='purchase'),
+    path('purchase/<int:book_id>/', order_views.AddToCartAndPurchaseView.as_view(), name='purchase_book'),
+    path('order-confirmation/', order_views.OrderConfirmationView.as_view(), name='order_confirmation'),
+    path('toggle-favorite/<int:book_id>/', main_views.ToggleFavoriteView.as_view(), name='toggle_favorite'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='password_reset.html'), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
+    path('book/<int:book_id>/add_review/', review_views.add_review, name='add_review'),
+    path('review/delete/<int:review_id>/', review_views.delete_review, name='delete_review'),
+    path('review/update/<int:review_id>/', review_views.update_review, name='update_review'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

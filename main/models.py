@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg
@@ -31,10 +32,16 @@ class Book(models.Model):
     cover_type = models.CharField(max_length=100, blank=True, null=True)
     book_type = models.CharField(max_length=100, null=True)
     original_name = models.CharField(max_length=100, blank=True, null=True)
+    publisher = models.CharField(max_length=100, blank=True, null=True)
+    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_available = models.BooleanField(default=True)
 
     def average_rating(self):
-        average = self.reviews.aggregate(Avg('rating'))['rating__avg']
-        return round(average, 1) if average is not None else 0
+        reviews = self.reviews.all()
+        if reviews:
+            return sum(review.rating for review in reviews) / reviews.count()
+        return 0
 
     def __str__(self):
         return self.title
@@ -54,3 +61,14 @@ class RecommendedBook(models.Model):
 
     def __str__(self):
         return f'Recommendations for user {self.user.username}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='favorited_by')
+
+    class Meta:
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.book.title} favorited by {self.user.username}"

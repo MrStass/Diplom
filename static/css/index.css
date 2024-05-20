@@ -1,0 +1,127 @@
+.books-page .book-page-btn {
+    margin-top: 5px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 24px;
+    font-size: 16px;
+    line-height: 1.5;
+    transition: background-color 0.3s;
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.books-page .book-buy-btn {
+    background-color: green;
+    color: white;
+}
+
+.books-page .book-favorite-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: red;
+    background: #fff;
+    padding: 5px;
+    border-radius: 50%;
+    border: 2px solid black;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.books-page .book-cart-action-btn{
+    background-color: orange;
+    color: white;
+}
+
+.books-page .book-cartin-action-btn.disabled {
+    background-color: orange;
+    color: white;
+}
+
+.book-column {
+    flex: 0 0 20%;
+    max-width: 20%;
+    padding: 0 10px;
+}
+
+.card-img-top {
+    height: 360px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.row {
+    margin-bottom: 20px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.card-title {
+    margin: 0;
+    flex-grow: 1;
+    align-items: flex-end;
+}
+
+.card-title a {
+    color: black;
+    text-decoration: none;
+}
+
+.availability {
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
+}
+
+.available {
+    color: green;
+}
+
+.not-available {
+    color: red;
+}
+.book-description {
+    text-align: justify;
+}
+.btn-group-vertical {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.books-page h2 {
+    margin-bottom: 20px;
+}
+
+.book-column {
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.card-text {
+    font-size: 0.9em;
+}
+
+.availability {
+    display: block;
+    margin-top: 10px;
+}
+
+.available {
+    color: green;
+}
+
+.not-available {
+    color: red;
+}

@@ -1,40 +1,97 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+{% endblock css %}
 
 {% block content %}
-<div class="book-detail">
-    <h2>{{ book.title }}</h2>
-    {% if book.image %}
-        <img src="{{ book.image.url }}" alt="{{ book.title }}" style="max-width: 300px;">
-    {% endif %}
-    <p>Автори: {{ book.authors.all|join:", " }}</p>
-    <p>Жанри: {{ book.genres.all|join:", " }}</p>
-    <p>Рік: {{ book.year }}</p>
-    <p>Опис: {{ book.description }}</p>
-    <p>Ціна: {{ book.price }} грн.</p>
-    <p>Формат: {{ book.book_format }}</p>
-    <p>Мова: {{ book.language }}</p>
-    <p>Кількість сторінок: {{ book.page_count }}</p>
-    <p>Тип обкладинки: {{ book.cover_type }}</p>
-    <p>Тип книги: {{ book.book_type }}</p>
-    <p>Оригінальна назва: {{ book.original_name }}</p>
-    <p>Середній рейтинг: {{ book.average_rating }} з 5</p>
-
-    <h3>Відгуки</h3>
-    {% for review in reviews %}
-    <div class="review">
-        <strong>{{ review.user.username }}</strong>
-        <p>Rating: {{ review.rating }}</p>
-        <p>{{ review.text }}</p>
+<div class="container mt-4 book-detail">
+    <div class="row">
+        <div class="col-md-4">
+            <img src="{{ book.image.url }}" class="img-fluid" alt="{{ book.title }}">
+        </div>
+        <div class="col-md-8 position-relative">
+            <h2>{{ book.title }}</h2>
+            <p><strong>Автори:</strong> {{ book.author.all|join:", " }}</p>
+            <p><strong>Жанри:</strong> {% for genre in book.genres.all %}<a href="#">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+            <p><strong>Видавництво:</strong> {{ book.publisher }}</p>
+            <p><strong>Рік видання:</strong> {{ book.year }}</p>
+            <p class="book-description"><strong>Опис:</strong> {{ book.description }}</p>
+            <div class="book-details mt-3">
+                <p><strong>Формат:</strong> {{ book.book_format }}</p>
+                <p><strong>Мова:</strong> {{ book.language }}</p>
+                <p><strong>Кількість сторінок:</strong> {{ book.page_count }}</p>
+                <p><strong>Тип обкладинки:</strong> {{ book.cover_type }}</p>
+                <p><strong>Тип книги:</strong> {{ book.book_type }}</p>
+                <p><strong>Оригінальна назва:</strong> {{ book.original_name }}</p>
+            </div>
+            <div class="mt-4">
+                <h3>{{ book.price }} грн</h3>
+            </div>
+            <div class="btn-group-vertical">
+                <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="book-page-btn book-buy-btn">Купити</button>
+                </form>
+                {% if is_in_cart %}
+                    <button class="btn btn-success mb-2 disabled">У кошику</button>
+                {% else %}
+                    <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-secondary add-to-cart-btn" data-book-id="{{ book.id }}">До кошика</button>
+                    </form>
+                {% endif %}
+                <button class="btn btn-outline-danger book-favorite-btn {% if is_favorited %}favorite{% endif %}" data-book-id="{{ book.id }}">
+                    {% if is_favorited %}
+                        <i class="fas fa-heart"></i>
+                    {% else %}
+                        <i class="far fa-heart"></i>
+                    {% endif %}
+                </button>
+            </div>
+        </div>
     </div>
-    {% empty %}
-    <p>Наразі відгуків немає.</p>
-    {% endfor %}
-
-    <h3>Залишити відгук:</h3>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+    <div class="mt-4">
+        <h3 id="average-rating">Рейтинг: {{ book.average_rating|floatformat:1 }} / 5</h3>
+        <h4>Відгуки:</h4>
+        <div id="reviews">
+            {% for review in book.reviews.all %}
+                <div class="review" id="review-{{ review.id }}">
+                    <p><strong>{{ review.user.username }}</strong> - {{ review.created_at|date:"Y-m-d H:i:s" }}</p>
+                    <p>Рейтинг: {{ review.rating }}</p>
+                    <p>{{ review.text }}</p>
+                    {% if review.user == user %}
+                        <button class="edit-review-button" data-review-id="{{ review.id }}">Редагувати</button>
+                        <button class="delete-review-button" data-review-id="{{ review.id }}">Видалити</button>
+                        <div class="edit-review-form" id="edit-review-form-{{ review.id }}" style="display: none;">
+                            <form method="post" action="{% url 'update_review' review.id %}">
+                                {% csrf_token %}
+                                {{ review_form.as_p }}
+                                <button type="submit" class="btn btn-primary">Оновити</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>Немає відгуків.</p>
+            {% endfor %}
+        </div>
+        <h4>Залишити відгук:</h4>
+        <form id="add-review-form" method="post" action="{% url 'add_review' book.id %}">
+            {% csrf_token %}
+            {{ review_form.as_p }}
+            <button type="submit" class="btn btn-primary">Додати</button>
+        </form>
+    </div>
 </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/favorites_actions.js' %}"></script>
+<script src="{% static 'js/add_to_cart.js' %}"></script>
+<script src="{% static 'js/reviews_actions.js' %}"></script>
+{% endblock %}
+
+{% block footer %}
+{% include 'includes/footer.html' %}
 {% endblock %}

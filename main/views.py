@@ -1,38 +1,45 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, FormView, View
-from main.forms import BookVectorForm, BookSelectForm
+from main.forms import BookVectorForm, BookSelectForm, SearchForm
 from main.models import *
 from django.views.generic.detail import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from cart.models import *
 import pickle
-from django.views.generic.edit import FormMixin
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from review.forms import ReviewForm
-from django.http import HttpResponseRedirect
+from review.models import Review
 
 
-class IndexView(LoginRequiredMixin, ListView):
+class IndexView(ListView):
     template_name = 'index.html'
     model = Book
     paginate_by = 10
+    context_object_name = 'books'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         if user.is_authenticated:
-            # Отримуємо кошик користувача, якщо існує
             cart, created = Cart.objects.get_or_create(user=user)
-            # Отримуємо список ID книг в кошику
             cart_books_ids = cart.items.values_list('book__id', flat=True)
+            favorite_books_ids = Favorite.objects.filter(user=user).values_list('book__id', flat=True)
+
             context['cart_books_ids'] = cart_books_ids
+            context['favorite_books_ids'] = favorite_books_ids
 
             recommendation = RecommendedBook.objects.filter(user=user).first()
             if recommendation:
                 context['recommended_books'] = recommendation.recommended.all()
+            else:
+                context['recommended_books'] = None
+
+        context['new_arrivals'] = Book.objects.filter(is_available=True).order_by('-created_at')[:5]
         return context
+
 
 class ChooseGenre(ListView):
     model = Book
@@ -44,35 +51,66 @@ class ChooseGenre(ListView):
         genre_id = self.kwargs.get('genre_id')
         return Book.objects.filter(genres__id=genre_id)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_authenticated:
+            cart, created = Cart.objects.get_or_create(user=user)
+            cart_books_ids = cart.items.values_list('book__id', flat=True)
+            favorite_books_ids = Favorite.objects.filter(user=user).values_list('book__id', flat=True)
 
-class BookDetailView(FormMixin, DetailView):
+            context['cart_books_ids'] = cart_books_ids
+            context['favorite_books_ids'] = favorite_books_ids
+
+        return context
+
+
+class ChooseAuthor(ListView):
     model = Book
-    template_name = 'book_detail.html'
-    form_class = ReviewForm
-    context_object_name = 'book'
+    template_name = 'index.html'
+    context_object_name = 'books'
+    paginate_by = 10
 
-    def get_success_url(self):
-        return reverse('book_detail', kwargs={'pk': self.object.pk})
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        review = form.save(commit=False)
-        review.book = self.object
-        review.user = self.request.user
-        review.save()
-        return HttpResponseRedirect(self.get_success_url())
+    def get_queryset(self):
+        author_id = self.kwargs.get('author_id')
+        return Book.objects.filter(author__id=author_id)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = self.get_form()
-        context['reviews'] = self.object.reviews.all()
+        user = self.request.user
+        if user.is_authenticated:
+            cart, created = Cart.objects.get_or_create(user=user)
+            cart_books_ids = cart.items.values_list('book__id', flat=True)
+            favorite_books_ids = Favorite.objects.filter(user=user).values_list('book__id', flat=True)
+
+            context['cart_books_ids'] = cart_books_ids
+            context['favorite_books_ids'] = favorite_books_ids
+
+        return context
+
+
+class BookDetailView(DetailView):
+    model = Book
+    template_name = 'book_detail.html'
+    context_object_name = 'book'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        book = context['book']
+
+        # Перевірка на улюблені книги
+        if user.is_authenticated:
+            context['is_favorited'] = Favorite.objects.filter(user=user, book=book).exists()
+            cart_items = CartItem.objects.filter(cart__user=user, book=book)
+            context['is_in_cart'] = cart_items.exists()
+
+        # Додавання форми для відгуків
+        context['review_form'] = ReviewForm()
+
+        # Додавання списку відгуків
+        context['reviews'] = Review.objects.filter(book=book).order_by('-created_at')
+
         return context
 
 
@@ -85,14 +123,13 @@ class BookVectorView(FormView):
     success_url = reverse_lazy('vectorize_book')
 
     def form_valid(self, form):
-        # Завантаження збереженого векторизатора
+
         with open(vectorizer_path, 'rb') as f:
             vectorizer = pickle.load(f)
 
         book = form.cleaned_data['book']
         description = form.cleaned_data['description']
 
-        # Використання існуючого векторизатора для трансформації опису
         vector = vectorizer.transform([description]).toarray()
         serialized_vector = pickle.dumps(vector)
 
@@ -129,15 +166,46 @@ class VectorDisplayView(View):
         return render(request, self.template_name, {'form': form})
 
 
-class SearchView():
-    template_name = 'index.html'
+class BookSearchView(ListView):
     model = Book
-    paginate_by = 10
+    template_name = 'search.html'
+    context_object_name = 'books'
 
     def get_queryset(self):
-        query = self.request.GET.get('q', None)
+        query = self.request.GET.get('query', '')
         if query:
-            return self.model.objects.filter(
+            return Book.objects.filter(
                 Q(title__icontains=query) |
-                Q(description__icontains=query))
-        return super(SearchView, self).get_queryset()
+                Q(author__name__icontains=query) |
+                Q(genres__name__icontains=query)
+            ).distinct()
+        return Book.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['search_form'] = SearchForm(self.request.GET or None)
+        if user.is_authenticated:
+            cart_items = CartItem.objects.filter(cart__user=user).values_list('book_id', flat=True)
+            context['cart_books_ids'] = set(cart_items)
+            favorite_items = Favorite.objects.filter(user=user).values_list('book_id', flat=True)
+            context['favorite_books_ids'] = set(favorite_items)
+        else:
+            context['cart_books_ids'] = set()
+            context['favorite_books_ids'] = set()
+        return context
+
+
+class ToggleFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, book_id):
+        book = get_object_or_404(Book, id=book_id)
+        favorite_qs = Favorite.objects.filter(user=request.user, book=book)
+
+        if favorite_qs.exists():
+            favorite_qs.delete()
+            action = 'remove'
+        else:
+            Favorite.objects.create(user=request.user, book=book)
+            action = 'add'
+
+        return JsonResponse({'status': 'success', 'action': action})

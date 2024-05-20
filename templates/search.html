@@ -1,10 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+{% endblock css %}
+{% block content %}
+<div class="container books-page">
+  <div class="row">
+    {% for book in object_list %}
+    <div class="col-md-2 book-column">
+      <div class="card h-100">
+        <a href="{% url 'book_detail' book.id %}">
+          <img src="{{ book.image.url }}" class="card-img-top" alt="{{ book.title }}">
+        </a>
+        <div class="card-body">
+          <div class="card-title">
+            <a href="{% url 'book_detail' book.id %}">{{ book.title }}</a>
+          </div>
+          <p class="card-text">
+            {% for author in book.author.all %}
+                {{ author.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </p>
+          <p class="card-text">{{ book.price }} грн</p>
+          <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="book-page-btn book-buy-btn">Купити</button>
+          </form>
+          <button class="book-favorite-btn {% if book.id in favorite_books_ids %}favorite{% endif %}" data-book-id="{{ book.id }}">
+            {% if book.id in favorite_books_ids %}
+                <i class="fas fa-heart"></i> 
+            {% else %}
+                <i class="far fa-heart"></i> 
+            {% endif %}
+          </button>
+          {% if book.id in cart_books_ids %}
+              <button class="book-page-btn book-cartin-action-btn disabled">У кошику</button>
+          {% else %}
+              <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.path }}">
+                  <button type="submit" class="book-page-btn book-cart-action-btn add-to-cart-btn" data-book-id="{{ book.id }}">Додати в кошик</button>
+              </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+        {% empty %}
+        <div class="col">
+            <p>No books found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% block javascript %}
+<script src="{% static 'js/favorites_actions.js' %}"></script>    
+<script src="{% static 'js/add_to_cart.js' %}"></script>
+{% endblock %}
+{% block footer %}
+{% include 'includes/footer.html' %}
+{% endblock %}

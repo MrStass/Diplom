@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
 {% load django_bootstrap5 %}
 {% block content %}
-        <div class="container">
-            <br>
-            <form method="post">{% csrf_token %}
-                <table>
-                    {% bootstrap_form form %}
-                    <tr>
-                        <td>
-                            <button type="submit" class="btn btn-success">Login</button>
-                        </td>
-                    </tr>
-                </table>
-            </form>
-        </div>
+<div class="container">
+    <br>
+    <form method="post">{% csrf_token %}
+        <table>
+            {% bootstrap_form form %}
+            <tr>
+                <td>
+                    <button type="submit" class="btn btn-success">Увійти</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <br>
+    <p>Якщо у вас немає облікового запису, ви можете <a href="{% url 'registration' %}">зареєструватися</a>.</p>
+    <p>Забули пароль? <a href="{% url 'password_reset' %}">Скинути пароль</a>.</p>
+</div>
 {% endblock content %}
