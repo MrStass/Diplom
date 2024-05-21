@@ -67,5 +67,5 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     loadFavoriteButtons();
-    window.loadFavoriteButtons = loadFavoriteButtons; // Додано для доступу з іншого скрипта
+    window.loadFavoriteButtons = loadFavoriteButtons;
 });

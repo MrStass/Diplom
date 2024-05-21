@@ -99,16 +99,13 @@ class BookDetailView(DetailView):
         user = self.request.user
         book = context['book']
 
-        # Перевірка на улюблені книги
         if user.is_authenticated:
             context['is_favorited'] = Favorite.objects.filter(user=user, book=book).exists()
             cart_items = CartItem.objects.filter(cart__user=user, book=book)
             context['is_in_cart'] = cart_items.exists()
 
-        # Додавання форми для відгуків
         context['review_form'] = ReviewForm()
 
-        # Додавання списку відгуків
         context['reviews'] = Review.objects.filter(book=book).order_by('-created_at')
 
         return context

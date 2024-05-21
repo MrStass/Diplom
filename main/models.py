@@ -33,7 +33,7 @@ class Book(models.Model):
     book_type = models.CharField(max_length=100, null=True)
     original_name = models.CharField(max_length=100, blank=True, null=True)
     publisher = models.CharField(max_length=100, blank=True, null=True)
-    weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    weight = models.DecimalField(max_digits=5, decimal_places=3, null=True)
     created_at = models.DateTimeField(default=timezone.now)
     is_available = models.BooleanField(default=True)
 

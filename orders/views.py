@@ -70,7 +70,6 @@ class PurchaseView(LoginRequiredMixin, View):
                     unit_price=book.price
                 )
 
-        # Очищення кошика після оформлення замовлення
         cart.items.all().delete()
 
         return redirect('order_confirmation')
@@ -87,6 +86,7 @@ class AddToCartAndPurchaseView(LoginRequiredMixin, View):
         cart_item.save()
 
         return redirect('purchase')
+
 
 class OrderConfirmationView(TemplateView):
     template_name = 'order_confirmation.html'

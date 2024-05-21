@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block css %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/book_detail.css' %}">
 {% endblock css %}
 
 {% block content %}
@@ -13,60 +13,92 @@
         <div class="col-md-8 position-relative">
             <h2>{{ book.title }}</h2>
             <p><strong>Автори:</strong> {{ book.author.all|join:", " }}</p>
-            <p><strong>Жанри:</strong> {% for genre in book.genres.all %}<a href="#">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-            <p><strong>Видавництво:</strong> {{ book.publisher }}</p>
+            <p><strong>Мова:</strong> {{ book.language }}</p>
+            <p><strong>Тип книги:</strong> {{ book.book_type }}</p>
             <p><strong>Рік видання:</strong> {{ book.year }}</p>
-            <p class="book-description"><strong>Опис:</strong> {{ book.description }}</p>
+            <p><strong>Жанри:</strong> {{ book.genres.all|join:", " }}</p>
+            <p id="average-rating">
+                <strong>Рейтинг:</strong>
+                <span class="rating-display" data-rating="{{ book.average_rating|floatformat:1 }}"></span>
+            </p>
+            <div class="price-buy">
+                <h4 class="book-price">{{ book.price }} грн</h4>
+                <div class="btn-group-vertical">
+                    <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary book-page-btn book-buy-btn">Купити</button>
+                    </form>
+                    {% if is_in_cart %}
+                        <button class="btn btn-success mb-2 disabled">У кошику</button>
+                    {% else %}
+                        <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary add-to-cart-btn" data-book-id="{{ book.id }}">До кошика</button>
+                        </form>
+                    {% endif %}
+                    <button class="btn btn-outline-danger book-favorite-btn {% if is_favorited %}favorite{% endif %}" data-book-id="{{ book.id }}">
+                        {% if is_favorited %}
+                            <i class="fas fa-heart"></i>
+                        {% else %}
+                            <i class="far fa-heart"></i>
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+            <p class="book-description mt-3"><strong>Опис:</strong> <span style="display: block; text-align: justify;">{{ book.description }}</span></p>
+            <h4>Характеристики:</h4>
             <div class="book-details mt-3">
                 <p><strong>Формат:</strong> {{ book.book_format }}</p>
                 <p><strong>Мова:</strong> {{ book.language }}</p>
+                <p><strong>Тип обкладинки:</strong> {{ book.cover_type }}</p>
+            </div>
+            <div id="view-all-details-container">
+                <button id="view-all-details">Показати всі характеристики</button>
+            </div>
+            <div id="all-details" style="display: none;">
                 <p><strong>Кількість сторінок:</strong> {{ book.page_count }}</p>
                 <p><strong>Тип обкладинки:</strong> {{ book.cover_type }}</p>
                 <p><strong>Тип книги:</strong> {{ book.book_type }}</p>
                 <p><strong>Оригінальна назва:</strong> {{ book.original_name }}</p>
-            </div>
-            <div class="mt-4">
-                <h3>{{ book.price }} грн</h3>
-            </div>
-            <div class="btn-group-vertical">
-                <form action="{% url 'purchase_book' book.id %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="book-page-btn book-buy-btn">Купити</button>
-                </form>
-                {% if is_in_cart %}
-                    <button class="btn btn-success mb-2 disabled">У кошику</button>
-                {% else %}
-                    <form action="{% url 'add_to_cart' book.id %}" method="post" class="add-to-cart-form" data-book-id="{{ book.id }}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-secondary add-to-cart-btn" data-book-id="{{ book.id }}">До кошика</button>
-                    </form>
-                {% endif %}
-                <button class="btn btn-outline-danger book-favorite-btn {% if is_favorited %}favorite{% endif %}" data-book-id="{{ book.id }}">
-                    {% if is_favorited %}
-                        <i class="fas fa-heart"></i>
-                    {% else %}
-                        <i class="far fa-heart"></i>
-                    {% endif %}
-                </button>
+                <p><strong>Видавництво:</strong> {{ book.publisher }}</p>
+                <p><strong>Вага:</strong> {{ book.weight }} кг</p>
+                <div id="hide-details-container">
+                    <button id="hide-all-details">Приховати характеристики</button>
+                </div>
             </div>
         </div>
     </div>
     <div class="mt-4">
-        <h3 id="average-rating">Рейтинг: {{ book.average_rating|floatformat:1 }} / 5</h3>
         <h4>Відгуки:</h4>
         <div id="reviews">
             {% for review in book.reviews.all %}
                 <div class="review" id="review-{{ review.id }}">
                     <p><strong>{{ review.user.username }}</strong> - {{ review.created_at|date:"Y-m-d H:i:s" }}</p>
-                    <p>Рейтинг: {{ review.rating }}</p>
+                    <p>
+                        <strong>Рейтинг:</strong>
+                        <span class="rating-display" data-rating="{{ review.rating }}"></span>
+                    </p>
                     <p>{{ review.text }}</p>
                     {% if review.user == user %}
-                        <button class="edit-review-button" data-review-id="{{ review.id }}">Редагувати</button>
-                        <button class="delete-review-button" data-review-id="{{ review.id }}">Видалити</button>
+                        <button class="btn btn-outline-primary edit-review-button" data-review-id="{{ review.id }}">Редагувати</button>
+                        <button class="btn btn-outline-danger delete-review-button" data-review-id="{{ review.id }}">Видалити</button>
                         <div class="edit-review-form" id="edit-review-form-{{ review.id }}" style="display: none;">
                             <form method="post" action="{% url 'update_review' review.id %}">
                                 {% csrf_token %}
-                                {{ review_form.as_p }}
+                                <div class="review-form-group">
+                                    <label for="rating">Рейтинг:</label>
+                                    <div class="rating">
+                                        <input type="radio" name="rating" id="edit-rating-5-{{ review.id }}" value="5" {% if review.rating == 5 %}checked{% endif %}><label for="edit-rating-5-{{ review.id }}">★</label>
+                                        <input type="radio" name="rating" id="edit-rating-4-{{ review.id }}" value="4" {% if review.rating == 4 %}checked{% endif %}><label for="edit-rating-4-{{ review.id }}">★</label>
+                                        <input type="radio" name="rating" id="edit-rating-3-{{ review.id }}" value="3" {% if review.rating == 3 %}checked{% endif %}><label for="edit-rating-3-{{ review.id }}">★</label>
+                                        <input type="radio" name="rating" id="edit-rating-2-{{ review.id }}" value="2" {% if review.rating == 2 %}checked{% endif %}><label for="edit-rating-2-{{ review.id }}">★</label>
+                                        <input type="radio" name="rating" id="edit-rating-1-{{ review.id }}" value="1" {% if review.rating == 1 %}checked{% endif %}><label for="edit-rating-1-{{ review.id }}">★</label>
+                                    </div>
+                                </div>
+                                <div class="review-form-group">
+                                    <label for="text">Відгук:</label>
+                                    <textarea name="text" id="text" class="review-textarea form-control">{{ review.text }}</textarea>
+                                </div>
                                 <button type="submit" class="btn btn-primary">Оновити</button>
                             </form>
                         </div>
@@ -79,7 +111,20 @@
         <h4>Залишити відгук:</h4>
         <form id="add-review-form" method="post" action="{% url 'add_review' book.id %}">
             {% csrf_token %}
-            {{ review_form.as_p }}
+            <div class="review-form-group">
+                <label for="rating">Рейтинг:</label>
+                <div class="rating">
+                    <input type="radio" name="rating" id="rating-5" value="5"><label for="rating-5">★</label>
+                    <input type="radio" name="rating" id="rating-4" value="4"><label for="rating-4">★</label>
+                    <input type="radio" name="rating" id="rating-3" value="3"><label for="rating-3">★</label>
+                    <input type="radio" name="rating" id="rating-2" value="2"><label for="rating-2">★</label>
+                    <input type="radio" name="rating" id="rating-1" value="1"><label for="rating-1">★</label>
+                </div>
+            </div>
+            <div class="review-form-group">
+                <label for="text">Відгук:</label>
+                <textarea name="text" id="text" class="review-textarea form-control"></textarea>
+            </div>
             <button type="submit" class="btn btn-primary">Додати</button>
         </form>
     </div>
@@ -90,6 +135,7 @@
 <script src="{% static 'js/favorites_actions.js' %}"></script>
 <script src="{% static 'js/add_to_cart.js' %}"></script>
 <script src="{% static 'js/reviews_actions.js' %}"></script>
+<script src="{% static 'js/characteristics.js' %}"></script>
 {% endblock %}
 
 {% block footer %}

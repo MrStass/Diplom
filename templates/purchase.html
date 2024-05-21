@@ -4,6 +4,7 @@
 {% block content %}
 <div class="container">
     <h1>Оформлення замовлення</h1>
+    
     <h2>Перегляд замовлення</h2>
     <table class="table">
         <thead>
@@ -30,9 +31,11 @@
             </tr>
         </tfoot>
     </table>
+    
     <form method="post">
         {% csrf_token %}
         <input type="hidden" name="book_id" value="{{ request.GET.book_id }}">
+        
         <h2>Контактні дані</h2>
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
@@ -42,7 +45,31 @@
             <label for="phone" class="form-label">Телефон</label>
             <input type="text" id="phone" name="phone" class="form-control" required>
         </div>
-        <h2>Дані доставки</h2>
+        
+        <h2>Спосіб оплати</h2>
+        <div class="mb-3">
+            <label for="payment_method" class="form-label">Спосіб оплати</label>
+            <select id="payment_method" name="payment_method" class="form-select" required>
+                <option value="cash">Наложений платіж</option>
+                <option value="card">Оплата карткою</option>
+            </select>
+        </div>
+        <div class="card-details d-none">
+            <div class="mb-3">
+                <label for="card_number" class="form-label">Номер картки</label>
+                <input type="text" id="card_number" name="card_number" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="card_expiry" class="form-label">Термін дії</label>
+                <input type="text" id="card_expiry" name="card_expiry" class="form-control" placeholder="мм/рр">
+            </div>
+            <div class="mb-3">
+                <label for="card_cvv" class="form-label">CVV</label>
+                <input type="text" id="card_cvv" name="card_cvv" class="form-control">
+            </div>
+        </div>
+        
+        <h2>Адреса доставки</h2>
         <div class="mb-3">
             <label for="city" class="form-label">Місто</label>
             <input type="text" id="city" name="city" class="form-control" required>
@@ -55,25 +82,27 @@
             <label for="house" class="form-label">Будинок</label>
             <input type="text" id="house" name="house" class="form-control" required>
         </div>
-        <div class="mb-3">
-            <label for="payment_method" class="form-label">Спосіб оплати</label>
-            <select id="payment_method" name="payment_method" class="form-select" required>
-                <option value="cash">Наложений платіж</option>
-                <option value="card">Оплата карткою</option>
-            </select>
-        </div>
-        <div class="card-details d-none mb-3">
-            <label for="card_number" class="form-label">Номер картки</label>
-            <input type="text" id="card_number" name="card_number" class="form-control">
-            <label for="card_expiry" class="form-label">Термін дії</label>
-            <input type="text" id="card_expiry" name="card_expiry" class="form-control" placeholder="мм/рр">
-            <label for="card_cvv" class="form-label">CVV</label>
-            <input type="text" id="card_cvv" name="card_cvv" class="form-control">
-        </div>
+        
         <button type="submit" class="btn btn-primary">Оформити замовлення</button>
     </form>
 </div>
 {% endblock %}
+
 {% block javascript %}
-<script src="{% static 'js/payment_handling.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethodSelect = document.getElementById('payment_method');
+        const cardDetails = document.querySelector('.card-details');
+        
+        paymentMethodSelect.addEventListener('change', function() {
+            if (this.value === 'card') {
+                cardDetails.classList.remove('d-none');
+                cardDetails.classList.add('d-block');
+            } else {
+                cardDetails.classList.remove('d-block');
+                cardDetails.classList.add('d-none');
+            }
+        });
+    });
+</script>
 {% endblock %}

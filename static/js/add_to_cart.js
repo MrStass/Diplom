@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.disabled = true;
                 }
 
-                // Оновити рекомендації
                 fetch(window.location.href, {
                     method: 'GET',
                     headers: {
@@ -38,9 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const oldRecommendations = document.querySelector('.recommended-books-container');
                     oldRecommendations.innerHTML = newRecommendations.innerHTML;
 
-                    // Перезавантажити скрипт для нових форм
                     loadAddToCartForms();
-                    loadFavoriteButtons(); // Перезавантажити обробники подій для кнопок додавання до бажаних
+                    loadFavoriteButtons();
                 })
                 .catch(error => console.error('Error:', error));
             }
@@ -57,5 +55,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     loadAddToCartForms();
-    loadFavoriteButtons(); // Початкове завантаження обробників подій для кнопок додавання до бажаних
+    loadFavoriteButtons();
 });

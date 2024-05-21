@@ -9,7 +9,7 @@ function updateProfile(field) {
 
     fetch('/profile/update/', {
         method: 'POST',
-        body: new URLSearchParams(formData), // Ensure data is sent in correct format
+        body: new URLSearchParams(formData),
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         }

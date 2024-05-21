@@ -42,10 +42,21 @@
         <tr>
             <td colspan="3">Загальна сума:</td>
             <td id="cart-total">{{ cart.total_cart_price }} грн</td>
-            <td><a href="{% url 'purchase' %}" class="btn btn-primary">Купити все</a></td>
+            <td>
+                {% if not cart.items.exists %}
+                <button class="btn btn-primary" disabled>Купити все</button>
+                {% else %}
+                <a href="{% url 'purchase' %}" class="btn btn-primary">Купити все</a>
+                {% endif %}
+            </td>
         </tr>
     </tfoot>
 </table>
+{% if not cart.items.exists %}
+<div class="alert alert-danger mt-3" role="alert">
+    Ваш кошик порожній. Додайте товари, щоб продовжити покупку.
+</div>
+{% endif %}
 {% endblock %}
 {% block javascript %}
 <script src="{% static 'js/cart_actions.js' %}"></script>

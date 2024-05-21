@@ -1,0 +1,112 @@
+.price-buy {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+}
+
+.book-detail .book-price {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.book-detail .btn-group-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.book-detail .btn-group-vertical .btn {
+    width: 150px;
+    margin-bottom: 5px;
+}
+
+.book-detail .book-page-btn {
+    width: 150px;
+    margin-bottom: 5px;
+    background-color: #42b883;
+    border-color: #42b883;
+}
+.book-detail .add-to-cart-btn {
+    background-color: #EA5B3D;
+    border-color: #EA5B3D;
+}
+
+#view-all-details, #hide-all-details {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 0;
+}
+
+#view-all-details:focus, #hide-all-details:focus {
+    outline: none;
+}
+
+#view-all-details::after {
+    content: " ▼";
+}
+
+#view-all-details.collapsed::after {
+    content: " ▲";
+}
+
+#hide-all-details::after {
+    content: " ▲";
+}
+
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.rating input {
+    display: none;
+}
+
+.rating label {
+    font-size: 1.5em;
+    color: #d3d3d3;
+    cursor: pointer;
+    text-shadow: 0 0 3px #000;
+}
+
+.rating input:checked ~ label,
+.rating label.selected {
+    color: #ffd700;
+}
+
+.rating input:hover ~ label {
+    color: #ffd700;
+}
+
+.review-form-group {
+    margin-bottom: 15px;
+}
+
+.review-textarea {
+    width: 100%;
+    height: 100px;
+}
+
+.review-form {
+    margin-top: 20px;
+}
+
+.review {
+    margin-bottom: 20px;
+}
+
+.rating-display {
+    font-size: 1.5em;
+    color: #ffd700;
+    text-shadow: 0 0 3px #000;
+}
+
+.book-description {
+    text-align: justify;
+}

@@ -12,7 +12,7 @@
 }
 
 .books-page .book-buy-btn {
-    background-color: green;
+    background-color: #42b883;
     color: white;
 }
 
@@ -29,12 +29,12 @@
 }
 
 .books-page .book-cart-action-btn{
-    background-color: orange;
+    background-color: #EA5B3D;
     color: white;
 }
 
 .books-page .book-cartin-action-btn.disabled {
-    background-color: orange;
+    background-color: #EA5B3D;
     color: white;
 }
 

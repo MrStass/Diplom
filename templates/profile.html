@@ -1,62 +1,87 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile.css' %}">
+{% endblock css %}
+
 {% block content %}
 <div class="container">
-    <h2>Профіль користувача</h2>
-    <table class="table">
-        <tr>
-            <th>Логін</th>
-            <td>{{ user.username }}</td>
-        </tr>
-        <tr>
-            <th>Ім'я</th>
-            <td>{{ user.first_name }}</td>
-        </tr>
-        <tr>
-            <th>Прізвище</th>
-            <td>{{ user.last_name }}</td>
-        </tr>
-        <tr>
-            <th>Електронна пошта</th>
-            <td>{{ user.email }}</td>
-        </tr>
-        <tr>
-            <th>Пароль</th>
-            <td>********</td>
-        </tr>
-    </table>
+    <h2 class="mb-4">Профіль користувача</h2>
+    <form method="post" action="{% url 'profile' %}" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group row mb-3">
+            <label for="{{ form.username.id_for_label }}" class="col-sm-2 col-form-label font-weight-bold" style="font-size: 1.2rem;">Ім'я користувача:</label>
+            <div class="col-sm-10">
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.username.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="{{ form.first_name.id_for_label }}" class="col-sm-2 col-form-label font-weight-bold" style="font-size: 1.2rem;">Ім'я:</label>
+            <div class="col-sm-10">
+                {{ form.first_name }}
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="{{ form.last_name.id_for_label }}" class="col-sm-2 col-form-label font-weight-bold" style="font-size: 1.2rem;">Прізвище:</label>
+            <div class="col-sm-10">
+                {{ form.last_name }}
+            </div>
+        </div>
+        <div class="form-group row mb-3">
+            <label for="{{ form.email.id_for_label }}" class="col-sm-2 col-form-label font-weight-bold" style="font-size: 1.2rem;">Email адреса:</label>
+            <div class="col-sm-10">
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.email.errors }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+    </form>
 
-    <h3>Бажані книжки</h3>
+    <h3 class="mb-3">Бажані книжки</h3>
     {% if favorite_books %}
-    <ul class="list-group">
+    <div class="favorite-books">
         {% for favorite in favorite_books %}
-        <li class="list-group-item">
-            <a href="{% url 'book_detail' favorite.book.id %}">{{ favorite.book.title }}</a>
-        </li>
-        {% endfor %}
-    </ul>
+            <a href="{% url 'book_detail' favorite.book.id %}">{{ favorite.book.title }}</a>{% if not forloop.last %}, {% endif %}
+        {% endfor %}.
+    </div>
     {% else %}
     <p>У вас немає бажаних книжок.</p>
     {% endif %}
 
-    <h3>Ваші замовлення</h3>
+    <h3 class="mb-3">Ваші замовлення</h3>
     {% if orders %}
-    <ul class="list-group">
+    <div class="row">
         {% for order in orders %}
-        <li class="list-group-item">
-            <h4>Замовлення №{{ order.id }} від {{ order.created_at }}</h4>
-            <p>Адреса доставки: {{ order.delivery_address }}</p>
-            <p>Метод оплати: {{ order.payment_method }}</p>
-            <ul>
-                {% for item in order.items.all %}
-                <li>{{ item.book.title }} - {{ item.quantity }} x {{ item.unit_price }} = {{ item.total_price }}</li>
-                {% endfor %}
-            </ul>
-            <p><strong>Загальна сума: {{ order.total_amount }}</strong></p>
-        </li>
+        <div class="col-md-6 mb-3 d-flex align-items-stretch">
+            <div class="card order-card w-100">
+                <div class="card-body">
+                    <h4 class="card-title">Замовлення №{{ order.id }} від {{ order.created_at }}</h4>
+                    <p class="card-text">Адреса доставки: {{ order.delivery_address }}</p>
+                    <p class="card-text">Метод оплати: {{ order.get_payment_method_display }}</p>
+                    <p class="card-text">Указаний номер телефону: {{ order.contact_phone }}</p>
+                    <ul>
+                        {% for item in order.items.all %}
+                        <li>{{ item.book.title }} - {{ item.quantity }} x {{ item.unit_price }} = {{ item.total_price }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p class="card-text"><strong>Загальна сума: {{ order.total_amount }}</strong></p>
+                </div>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
     {% else %}
     <p>У вас немає замовлень.</p>
     {% endif %}
 </div>
 {% endblock content %}
+

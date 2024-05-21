@@ -4,12 +4,16 @@ from main.models import Book
 
 
 class Order(models.Model):
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Наложений платіж'),
+        ('card', 'Картка'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     contact_email = models.EmailField(max_length=255, null=True)
     contact_phone = models.CharField(max_length=20, null=True)
     delivery_address = models.CharField(max_length=255, null=True)
-    payment_method = models.CharField(max_length=20, choices=(('cash', 'Cash on Delivery'), ('card', 'Card Payment')), null=True)
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, null=True)
     card_details = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
