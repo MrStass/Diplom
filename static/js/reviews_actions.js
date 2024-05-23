@@ -1,13 +1,16 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    // Додає обробник події для кнопки редагування відгуку
     function addEditEventListener(button) {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const reviewId = this.getAttribute('data-review-id');
             const editForm = document.getElementById(`edit-review-form-${reviewId}`);
             editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
-            editForm.addEventListener('submit', function(e) {
+
+            editForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const form = e.target;
                 const formData = new FormData(form);
+
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
@@ -40,10 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Додає обробник події для кнопки видалення відгуку
     function addDeleteEventListener(button) {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const reviewId = this.getAttribute('data-review-id');
             const deleteUrl = `/review/delete/${reviewId}/`;
+
             fetch(deleteUrl, {
                 method: 'POST',
                 headers: {
@@ -67,7 +72,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    document.getElementById('add-review-form').addEventListener('submit', function(e) {
+    // Обробник форми додавання нового відгуку
+    document.getElementById('add-review-form').addEventListener('submit', function (e) {
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
@@ -132,16 +138,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Додає обробники подій для існуючих кнопок редагування відгуків
     document.querySelectorAll('.edit-review-button').forEach(button => {
         addEditEventListener(button);
     });
 
+    // Додає обробники подій для існуючих кнопок видалення відгуків
     document.querySelectorAll('.delete-review-button').forEach(button => {
         addDeleteEventListener(button);
     });
 
+    // Функція для оновлення відображення зірок рейтингу
     function updateRatingsDisplay() {
-        document.querySelectorAll('.rating-display').forEach(function(span) {
+        document.querySelectorAll('.rating-display').forEach(function (span) {
             const rating = parseFloat(span.getAttribute('data-rating'));
             const fullStars = Math.floor(rating);
             const halfStar = rating % 1 >= 0.5;
@@ -159,12 +168,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateRatingsDisplay();
 
-    document.querySelectorAll('.rating input').forEach(function(radio) {
-        radio.addEventListener('change', function() {
+    // Додає обробники подій для оновлення зірок рейтингу при зміні вибору
+    document.querySelectorAll('.rating input').forEach(function (radio) {
+        radio.addEventListener('change', function () {
             updateRatingStars(this);
         });
     });
 
+    // Функція для оновлення зірок рейтингу при зміні вибору
     function updateRatingStars(radio) {
         const ratingDiv = radio.closest('.rating');
         const radios = ratingDiv.querySelectorAll('input');
@@ -179,17 +190,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    document.querySelectorAll('.rating input:checked').forEach(function(radio) {
+    // Оновлення зірок рейтингу для вибраних елементів
+    document.querySelectorAll('.rating input:checked').forEach(function (radio) {
         updateRatingStars(radio);
     });
 
-    document.querySelectorAll('#add-review-form .rating input').forEach(function(radio) {
-        radio.addEventListener('change', function() {
+    // Додає обробники подій для оновлення зірок рейтингу в формі додавання відгуку
+    document.querySelectorAll('#add-review-form .rating input').forEach(function (radio) {
+        radio.addEventListener('change', function () {
             updateRatingStars(this);
         });
     });
 
-    document.querySelectorAll('#add-review-form .rating input:checked').forEach(function(radio) {
+    // Оновлення зірок рейтингу для вибраних елементів в формі додавання відгуку
+    document.querySelectorAll('#add-review-form .rating input:checked').forEach(function (radio) {
         updateRatingStars(radio);
     });
 });

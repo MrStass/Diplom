@@ -1,20 +1,22 @@
 document.addEventListener("DOMContentLoaded", function() {
+    // Функція для завантаження всіх кнопок улюблених книг
     function loadFavoriteButtons() {
         document.querySelectorAll('.book-favorite-btn').forEach(button => {
-            button.removeEventListener('click', handleToggleFavorite);
-            button.addEventListener('click', handleToggleFavorite);
+            button.removeEventListener('click', handleToggleFavorite); // Видалення існуючих обробників подій
+            button.addEventListener('click', handleToggleFavorite); // Додавання нового обробника подій
         });
     }
 
+    // Функція для обробки натискання на кнопку улюблених книг
     function handleToggleFavorite(event) {
         event.preventDefault();
         const button = this;
-        const bookId = button.dataset.bookId;
+        const bookId = button.dataset.bookId; // Отримання ID книги з атрибуту кнопки
 
         fetch(`/toggle-favorite/${bookId}/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
+                'X-CSRFToken': getCookie('csrftoken'), // Додавання CSRF-токену до заголовків
                 'Content-Type': 'application/json',
             },
         })
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(data => {
             if (data.status === 'success') {
-                updateFavoriteButtons(bookId, data.action);
+                updateFavoriteButtons(bookId, data.action); // Оновлення стану кнопок улюблених книг
             }
         })
         .catch(error => {
@@ -35,22 +37,24 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // Функція для оновлення стану кнопок улюблених книг
     function updateFavoriteButtons(bookId, action) {
         const buttons = document.querySelectorAll(`.book-favorite-btn[data-book-id="${bookId}"]`);
         buttons.forEach(button => {
             const icon = button.querySelector('i');
             if (action === 'add') {
-                icon.classList.remove('far');
+                icon.classList.remove('far'); // Зміна іконки на заповнену
                 icon.classList.add('fas');
-                button.classList.add('favorite');
+                button.classList.add('favorite'); // Додавання класу "favorite" до кнопки
             } else {
-                icon.classList.remove('fas');
+                icon.classList.remove('fas'); // Зміна іконки на порожню
                 icon.classList.add('far');
-                button.classList.remove('favorite');
+                button.classList.remove('favorite'); // Видалення класу "favorite" з кнопки
             }
         });
     }
 
+    // Функція для отримання значення кукі за ім'ям
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -66,6 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return cookieValue;
     }
 
+    // Завантаження всіх кнопок улюблених книг при завантаженні сторінки
     loadFavoriteButtons();
-    window.loadFavoriteButtons = loadFavoriteButtons;
+    window.loadFavoriteButtons = loadFavoriteButtons; // Додавання функції до глобального об'єкту
 });

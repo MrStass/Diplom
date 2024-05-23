@@ -199,9 +199,9 @@
                                 </form>
                                 <button class="book-favorite-btn {% if book.id in favorite_books_ids %}favorite{% endif %}" data-book-id="{{ book.id }}">
                                     {% if book.id in favorite_books_ids %}
-                                        <i class="fas fa-heart"></i> 
+                                        <i class="fas fa-heart"></i>
                                     {% else %}
-                                        <i class="far fa-heart"></i> 
+                                        <i class="far fa-heart"></i>
                                     {% endif %}
                                 </button>
                                 {% if user.is_authenticated %}

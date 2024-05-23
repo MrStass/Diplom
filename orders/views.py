@@ -1,7 +1,6 @@
 from django.views import View
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-
 from .models import Order, OrderItem
 from main.models import Book
 from cart.models import Cart, CartItem
@@ -9,6 +8,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
+# Представлення для покупки книг
 class PurchaseView(LoginRequiredMixin, View):
     def get(self, request, book_id=None):
         cart = Cart.objects.get(user=request.user)
@@ -16,6 +16,7 @@ class PurchaseView(LoginRequiredMixin, View):
         total_price = 0
 
         if book_id:
+            # Якщо book_id передано, додається вибрана книга до списку книг
             book = get_object_or_404(Book, id=book_id)
             book_in_cart = False
             for item in cart.items.all():
@@ -27,6 +28,7 @@ class PurchaseView(LoginRequiredMixin, View):
                 books.append((book, 1))
                 total_price += book.price
         else:
+            # Якщо book_id не передано, додаються всі книги з кошика
             cart_items = cart.items.all()
             for item in cart_items:
                 books.append((item.book, item.quantity))
@@ -41,6 +43,7 @@ class PurchaseView(LoginRequiredMixin, View):
 
     def post(self, request):
         cart = Cart.objects.get(user=request.user)
+        # Створення нового замовлення
         order = Order.objects.create(
             user=request.user,
             contact_email=request.POST.get('email'),
@@ -51,6 +54,7 @@ class PurchaseView(LoginRequiredMixin, View):
                 'payment_method') == 'card' else ''
         )
 
+        # Додавання товарів з кошика до замовлення
         for item in cart.items.all():
             OrderItem.objects.create(
                 order=order,
@@ -59,6 +63,7 @@ class PurchaseView(LoginRequiredMixin, View):
                 unit_price=item.book.price
             )
 
+        # Якщо book_id передано, додається вибрана книга до замовлення
         book_id = request.POST.get('book_id')
         if book_id:
             book = get_object_or_404(Book, id=book_id)
@@ -70,11 +75,12 @@ class PurchaseView(LoginRequiredMixin, View):
                     unit_price=book.price
                 )
 
+        # Очищення кошика після оформлення замовлення
         cart.items.all().delete()
 
         return redirect('order_confirmation')
 
-
+# Представлення для додавання книги до кошика та перенаправлення на сторінку покупки
 class AddToCartAndPurchaseView(LoginRequiredMixin, View):
     def post(self, request, book_id):
         book = get_object_or_404(Book, id=book_id)
@@ -87,6 +93,6 @@ class AddToCartAndPurchaseView(LoginRequiredMixin, View):
 
         return redirect('purchase')
 
-
+# Представлення для підтвердження замовлення
 class OrderConfirmationView(TemplateView):
     template_name = 'order_confirmation.html'

@@ -13,7 +13,7 @@ from django.urls import reverse
 from review.forms import ReviewForm
 from review.models import Review
 
-
+# Головна сторінка з відображенням списку книг
 class IndexView(ListView):
     template_name = 'index.html'
     model = Book
@@ -40,7 +40,7 @@ class IndexView(ListView):
         context['new_arrivals'] = Book.objects.filter(is_available=True).order_by('-created_at')[:5]
         return context
 
-
+# Відображення книг за вибраним жанром
 class ChooseGenre(ListView):
     model = Book
     template_name = 'index.html'
@@ -64,7 +64,7 @@ class ChooseGenre(ListView):
 
         return context
 
-
+# Відображення книг за вибраним автором
 class ChooseAuthor(ListView):
     model = Book
     template_name = 'index.html'
@@ -88,7 +88,7 @@ class ChooseAuthor(ListView):
 
         return context
 
-
+# Відображення детальної інформації про книгу
 class BookDetailView(DetailView):
     model = Book
     template_name = 'book_detail.html'
@@ -105,22 +105,19 @@ class BookDetailView(DetailView):
             context['is_in_cart'] = cart_items.exists()
 
         context['review_form'] = ReviewForm()
-
         context['reviews'] = Review.objects.filter(book=book).order_by('-created_at')
 
         return context
 
-
 vectorizer_path = '/app/resources/vectorizer.pkl'
 
-
+# Відображення форми для векторизації книги
 class BookVectorView(FormView):
     template_name = 'vector.html'
     form_class = BookVectorForm
     success_url = reverse_lazy('vectorize_book')
 
     def form_valid(self, form):
-
         with open(vectorizer_path, 'rb') as f:
             vectorizer = pickle.load(f)
 
@@ -137,7 +134,7 @@ class BookVectorView(FormView):
 
         return super().form_valid(form)
 
-
+# Відображення векторного представлення книги
 class VectorDisplayView(View):
     form_class = BookSelectForm
     template_name = 'vector_display.html'
@@ -162,7 +159,7 @@ class VectorDisplayView(View):
             })
         return render(request, self.template_name, {'form': form})
 
-
+# Пошук книг
 class BookSearchView(ListView):
     model = Book
     template_name = 'search.html'
@@ -192,7 +189,7 @@ class BookSearchView(ListView):
             context['favorite_books_ids'] = set()
         return context
 
-
+# Перемикання статусу улюбленої книги
 class ToggleFavoriteView(LoginRequiredMixin, View):
     def post(self, request, book_id):
         book = get_object_or_404(Book, id=book_id)
