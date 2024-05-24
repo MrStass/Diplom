@@ -28,7 +28,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.books-page .book-cart-action-btn{
+.books-page .book-cart-action-btn {
     background-color: #EA5B3D;
     color: white;
 }
@@ -85,9 +85,11 @@
 .not-available {
     color: red;
 }
+
 .book-description {
     text-align: justify;
 }
+
 .btn-group-vertical {
     position: absolute;
     right: 0;
@@ -96,6 +98,7 @@
     flex-direction: column;
     gap: 10px;
 }
+
 .books-page h2 {
     margin-bottom: 20px;
 }
@@ -124,4 +127,34 @@
 
 .not-available {
     color: red;
+}
+
+.custom-carousel-control {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.carousel-control-prev.custom-carousel-control {
+    left: -25px;
+}
+
+.carousel-control-next.custom-carousel-control {
+    right: -25px;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: black;
+    width: 20px;
+    height: 20px;
+    mask-size: contain;
 }
