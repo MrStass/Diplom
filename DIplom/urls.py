@@ -56,4 +56,6 @@ urlpatterns = [
     path('book/<int:book_id>/add_review/', review_views.add_review, name='add_review'),
     path('review/delete/<int:review_id>/', review_views.delete_review, name='delete_review'),
     path('review/update/<int:review_id>/', review_views.update_review, name='update_review'),
+    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='registration/password_change_form.html'), name='password_change'),
+    path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'), name='password_change_done'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

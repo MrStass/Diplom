@@ -15,9 +15,10 @@ class Order(models.Model):
     delivery_address = models.CharField(max_length=255, null=True)
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, null=True)
     card_details = models.CharField(max_length=255, blank=True, null=True)
+    order_number = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"Order #{self.id} by {self.user.username}"
+        return f"Order #{self.order_number} by {self.user.username}"
 
 
 class OrderItem(models.Model):

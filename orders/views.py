@@ -1,3 +1,4 @@
+from django.db.models import Max
 from django.views import View
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
@@ -8,7 +9,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-# Представлення для покупки книг
 class PurchaseView(LoginRequiredMixin, View):
     def get(self, request, book_id=None):
         cart = Cart.objects.get(user=request.user)
@@ -43,15 +43,21 @@ class PurchaseView(LoginRequiredMixin, View):
 
     def post(self, request):
         cart = Cart.objects.get(user=request.user)
+        # Отримати максимальний order_number для цього користувача
+        max_order_number = Order.objects.filter(user=request.user).aggregate(Max('order_number'))['order_number__max']
+        if max_order_number is None:
+            max_order_number = 0
+
         # Створення нового замовлення
         order = Order.objects.create(
             user=request.user,
             contact_email=request.POST.get('email'),
             contact_phone=request.POST.get('phone'),
-            delivery_address=f"{request.POST.get('city')}, {request.POST.get('street')}, {request.POST.get('house')}",
+            delivery_address=f"{request.POST.get('city')}, {request.POST.get('street')}, {request.POST.get('house')}, Кв/Офіс {request.POST.get('apartment')}",
             payment_method=request.POST.get('payment_method'),
             card_details=f"{request.POST.get('card_number')}, {request.POST.get('card_expiry')}, {request.POST.get('card_cvv')}" if request.POST.get(
-                'payment_method') == 'card' else ''
+                'payment_method') == 'card' else '',
+            order_number=max_order_number + 1
         )
 
         # Додавання товарів з кошика до замовлення

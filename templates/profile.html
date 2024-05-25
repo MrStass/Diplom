@@ -46,6 +46,10 @@
         <button type="submit" class="btn btn-primary">Зберегти зміни</button>
     </form>
 
+    <form method="get" action="{% url 'password_change' %}">
+        <button type="submit" class="btn btn-secondary">Змінити пароль</button>
+    </form>
+
     <h3 class="mb-3">Бажані книжки</h3>
     {% if favorite_books %}
     <div class="favorite-books">
@@ -64,7 +68,7 @@
         <div class="col-md-6 mb-3 d-flex align-items-stretch">
             <div class="card order-card w-100">
                 <div class="card-body">
-                    <h4 class="card-title">Замовлення №{{ order.id }} від {{ order.created_at }}</h4>
+                    <h4 class="card-title">Замовлення №{{ order.order_number }} від {{ order.created_at }}</h4>
                     <p class="card-text">Адреса доставки: {{ order.delivery_address }}</p>
                     <p class="card-text">Метод оплати: {{ order.get_payment_method_display }}</p>
                     <p class="card-text">Указаний номер телефону: {{ order.contact_phone }}</p>
@@ -84,4 +88,3 @@
     {% endif %}
 </div>
 {% endblock content %}
-
