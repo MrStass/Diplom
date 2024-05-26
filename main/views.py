@@ -107,6 +107,10 @@ class BookDetailView(DetailView):
         context['review_form'] = ReviewForm()
         context['reviews'] = Review.objects.filter(book=book).order_by('-created_at')
 
+        # Додати рекомендовані книги
+        context['recommended_books'] = Book.objects.filter(genres__in=book.genres.all()).exclude(id=book.id)[:15]
+        context['favorite_books_ids'] = Favorite.objects.filter(user=user).values_list('book_id', flat=True)
+
         return context
 
 vectorizer_path = '/app/resources/vectorizer.pkl'
